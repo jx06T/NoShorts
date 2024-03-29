@@ -1,0 +1,49 @@
+{
+   "manifest_version": 3,
+   "name": "NoShorts",
+   "description": "NoShorts",
+   "version": "1.0",
+   "background": {
+      "service_worker": "background.js"
+   },
+   "permissions": [
+      "tabs",
+      "scripting",
+      "activeTab",
+      "storage"
+   ],
+   "host_permissions": [
+      "*://*/*"
+   ],
+   "icons": {
+      "16": "images/NoShorts16.png",
+      "32": "images/NoShorts32.png",
+      "48": "images/NoShorts48.png",
+      "128": "images/NoShorts128.png"
+   },
+   "options_page": "options.html",
+   "content_scripts": [
+      {
+         "js": [
+            "yt/yt_content.js"
+         ],
+         "css": [
+            "yt/yt_content.css"
+         ],
+         "matches": [
+            "https://www.youtube.com/*"
+         ]
+      },
+      {
+         "js": [
+            "ig/ig_content.js"
+         ],
+         "css": [
+            "ig/ig_content.css"
+         ],
+         "matches": [
+            "https://www.instagram.com/*"
+         ]
+      }
+   ]
+}

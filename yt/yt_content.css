@@ -1,0 +1,7 @@
+.JX06_SHORTS_BD2>* {
+    filter: blur(70px) !important;
+}
+
+.JX06_SHORTS_BD1 * {
+    pointer-events: none !important;
+}
