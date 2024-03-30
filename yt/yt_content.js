@@ -3,7 +3,7 @@ console.log("yt")
 class html {
     constructor() {
     }
-    init(InitLoop) {
+    init() {
         this.URL = window.location.href;
         // console.log(this.URL)
 
@@ -67,9 +67,9 @@ class fun {
         })
     }
     BlurSHORTS() {
-        HTML.SHORTS_BD.classList.add("JX06_SHORTS_BD1")
-        HTML.SHORTS_BDt.classList.add("JX06_SHORTS_BD2")
         let t = setInterval(() => {
+            HTML.SHORTS_BD.classList.add("JX06_SHORTS_BD1")
+            HTML.SHORTS_BDt.classList.add("JX06_SHORTS_BD2")
             if (!window.location.href.includes("/shorts")) {
                 clearInterval(t)
             }
@@ -80,7 +80,6 @@ class fun {
 
         document.addEventListener('keydown', (event) => {
             if (event.keyCode === 38 || event.keyCode === 40) {
-                console.log('上下鍵被按下');
                 window.location.href = "https://www.youtube.com/";
                 // window.history.back()
             }
