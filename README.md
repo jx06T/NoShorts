@@ -10,7 +10,7 @@ a.是否啟用:最上方勾選框
 b.隱藏:讓連續短片按鈕消失
 c.模糊:完全封鎖
 d.鎖定:阻止連續滾動(下方限制指最高滾動次數)
-![sample1](https://github.com/jx06T/Self-introduction-annotation-relationship-diagram_instagram_PY/blob/main/img/note1.png)
+![sample1](images/i1.jpeg)
     
 ## 下載&安裝
 1.下載資料夾並解壓縮：code -> download ZIP 
