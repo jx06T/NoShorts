@@ -2,6 +2,7 @@ console.log("yt")
 
 class html {
     constructor() {
+        this.count = 0
     }
     init() {
         this.URL = window.location.href;
@@ -9,6 +10,8 @@ class html {
 
         if (this.URL.includes("/shorts") && !this.URL.includes("@")) {
             this.init2()
+        } else {
+            this.count = 0
         }
         if (this.URL.includes("/watch")) {
             this.init3()
@@ -16,7 +19,9 @@ class html {
         FUN.WaitST('[title="Shorts"][id = "endpoint"]', (a) => {
             this.SHORTS_B = a
             this.getAllSD()
-            FUN.RemoveST(this.SHORTS_B)
+            if (ST.hide) {
+                FUN.RemoveST(this.SHORTS_B)
+            }
         })
     }
     getAllSD() {
@@ -28,16 +33,24 @@ class html {
             }
         });
         this.SHORTS_Ds = targetSDs
-        console.log(targetSDs)
-        FUN.HideSHORTS_D()
+        // console.log(targetSDs)
+        if (ST.hide) {
+            FUN.HideSHORTS_D()
+        }
     }
     init2() {
-        let Mpage = document.getElementById("page-manager")
-        this.SHORTS_BD = Mpage.querySelector('[role="main"]')
-        this.SHORTS_BDt = this.SHORTS_BD.querySelector('[id="shorts-inner-container"]')
-        console.log(this.SHORTS_BD)
-        FUN.BlurSHORTS()
-
+        FUN.WaitST('[id = "page-manager"]', (a) => {
+            let Mpage = a
+            this.SHORTS_BD = Mpage.querySelector('[role="main"]')
+            this.SHORTS_BDt = this.SHORTS_BD.querySelector('[id="shorts-inner-container"]')
+            console.log(this.SHORTS_BD)
+            if (ST.blur) {
+                FUN.BlurSHORTS()
+            }
+            if (ST.lock) {
+                FUN.LockSHORTS()
+            }
+        })
     }
     init3() {
         FUN.WaitST('ytd-reel-shelf-renderer', (a) => {
@@ -71,16 +84,24 @@ class fun {
             HTML.SHORTS_BD.classList.add("JX06_SHORTS_BD1")
             HTML.SHORTS_BDt.classList.add("JX06_SHORTS_BD2")
             if (!window.location.href.includes("/shorts")) {
+                HTML.count = 0
                 clearInterval(t)
             }
             HTML.SHORTS_BDt.querySelectorAll("video").forEach((a) => {
                 a.muted = true
             });
         }, 1000)
-
+    }
+    LockSHORTS() {
+        if (HTML.count > Number(ST.limitValue)) {
+            HTML.SHORTS_BD.classList.add("JX06_SHORTS_BD1")
+        }
         document.addEventListener('keydown', (event) => {
             if (event.keyCode === 38 || event.keyCode === 40) {
-                window.location.href = "https://www.youtube.com/";
+                if (HTML.count > Number(ST.limitValue)) {
+                    window.location.href = "https://www.youtube.com/";
+                    HTML.count = 0
+                }
                 // window.history.back()
             }
         });
@@ -89,7 +110,7 @@ class fun {
         this.waits[html] = setInterval(() => {
             let t = document.querySelector(html)
             if (t) {
-                console.log(t)
+                // console.log(t)
                 callback(t)
                 clearInterval([this.waits[html]])
             }
@@ -97,15 +118,36 @@ class fun {
     }
 }
 
+function getYoutubeSettings() {
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get('youtubeSettings', (data) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError.message);
+            } else {
+                resolve(data.youtubeSettings || {});
+            }
+        });
+    });
+}
+
 
 let HTML = new html()
 let FUN = new fun()
+let ST = {}
 
 window.addEventListener("load", () => {
-    HTML.init()
-})
-setInterval(() => {
-    if (window.location.href !== HTML.URL) {
+    getYoutubeSettings().then((settings) => {
+        ST = settings
+        console.log('YouTube Settings:', settings);
+        if (!ST.able) {
+            return
+        }
         HTML.init()
-    }
-}, 3000);
+        setInterval(() => {
+            if (window.location.href !== HTML.URL) {
+                HTML.init()
+                HTML.count++
+            }
+        }, 1000);
+    });
+})

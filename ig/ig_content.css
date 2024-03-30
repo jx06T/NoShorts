@@ -1,8 +1,6 @@
 .JX06_REELS_BD1 *{
-    filter: blur(10px) !important;
-    pointer-events: none !important;
+    filter: blur(20px) !important;
 }
 .JX06_REELS_BD2 *{
-    filter: blur(10px) !important;
     pointer-events: none !important;
 }

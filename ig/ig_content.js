@@ -2,26 +2,33 @@ console.log("ig")
 
 class html {
     constructor() {
+        this.count = 0
+
     }
     init() {
         this.URL = window.location.href;
-        console.log(this.URL)
+        // console.log(this.URL)
 
-        if (this.URL.includes(".com/reels")) {
-            this.init2()
-        }
         if (this.URL.includes("/reel") && !this.URL.includes("/reels")) {
             this.init1()
+        } else if (this.URL.includes(".com/reels")) {
+            this.init2()
+        } else {
+            this.count = 0
         }
+
         FUN.WaitST('[class="x1iyjqo2 xh8yej3"]', (a) => {
             this.REELS_B = a.childNodes[3]
-            FUN.RemoveST(this.REELS_B)
+            console.log(a.childNodes.length)
+            if (ST.hide && a.childNodes.length == 8) {
+                FUN.RemoveST(this.REELS_B)
+            }
         })
     }
     init1() {
         FUN.WaitST('[class="x1cy8zhl x9f619 x78zum5 xl56j7k x2lwn1j xeuugli x47corl"]', (a) => {
             this.REELS_BD2 = a
-            console.log(this.REELS_BD2)
+            // console.log(this.REELS_BD2)
             FUN.BlurREELS2()
         })
     }
@@ -44,36 +51,56 @@ class fun {
 
     BlurREELS() {
         let t = setInterval(() => {
-            HTML.REELS_BD.classList.add("JX06_REELS_BD1")
-            if (!window.location.href.includes("/reels")) {
+            if (ST.blur) {
+                HTML.REELS_BD.classList.add("JX06_REELS_BD1")
+            }
+            if (ST.blur || (ST.lock && HTML.count > Number(ST.limitValue))) {
+                HTML.REELS_BD.classList.add("JX06_REELS_BD2")
+                HTML.REELS_BD.querySelectorAll("video").forEach((a) => {
+                    a.muted = true
+                });
+            }
+
+            if (!window.location.href.includes(".com/reels")) {
+                HTML.count = 0
                 clearInterval(t)
             }
-            HTML.REELS_BD.querySelectorAll("video").forEach((a) => {
-                a.muted = true
-            });
+
         }, 1000)
 
         document.addEventListener('keydown', (event) => {
             if (event.keyCode === 38 || event.keyCode === 40) {
-                window.location.href = "https://www.instagram.com/";
+                if (HTML.count > Number(ST.limitValue)) {
+                    window.location.href = "https://www.instagram.com/";
+                    HTML.count = 0
+                }
                 // window.history.back()
             }
         });
     }
     BlurREELS2() {
         let t = setInterval(() => {
-            HTML.REELS_BD2.classList.add("JX06_REELS_BD2")
-            if (!window.location.href.includes("/reels")) {
+            if (ST.blur) {
+                HTML.REELS_BD2.classList.add("JX06_REELS_BD1")
+            }
+            if (ST.blur || (ST.lock && HTML.count > Number(ST.limitValue))) {
+                HTML.REELS_BD2.classList.add("JX06_REELS_BD2")
+                HTML.REELS_BD2.querySelectorAll("video").forEach((a) => {
+                    a.muted = true
+                });
+            }
+            if (!window.location.href.includes("/reel")) {
+                HTML.count = 0
                 clearInterval(t)
             }
-            HTML.REELS_BD2.querySelectorAll("video").forEach((a) => {
-                a.muted = true
-            });
         }, 1000)
 
         document.addEventListener('keydown', (event) => {
             if (event.keyCode === 37 || event.keyCode === 39) {
-                window.location.href = "https://www.instagram.com/";
+                if (HTML.count > Number(ST.limitValue)) {
+                    window.location.href = "https://www.instagram.com/";
+                    HTML.count = 0
+                }
                 // window.history.back()
             }
         });
@@ -90,15 +117,39 @@ class fun {
     }
 }
 
+function getInstagramSettings() {
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get('instagramSettings', (data) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError.message);
+            } else {
+                resolve(data.instagramSettings || {});
+            }
+        });
+    });
+}
 
 let HTML = new html()
 let FUN = new fun()
+let ST = {}
 
 window.addEventListener("load", () => {
-    HTML.init()
-})
-setInterval(() => {
-    if (window.location.href !== HTML.URL) {
+    getInstagramSettings().then((settings) => {
+        console.log('Instagram Settings:', settings);
+        ST = settings
+        if (!ST.able) {
+            return
+        }
         HTML.init()
-    }
-}, 3000);
+        setInterval(() => {
+            if (window.location.href !== HTML.URL) {
+                HTML.init()
+                HTML.count++
+            }
+        }, 1000);
+    });
+})
+
+
+
+
