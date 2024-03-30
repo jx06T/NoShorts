@@ -6,35 +6,18 @@ class html {
     init(InitLoop) {
         this.URL = window.location.href;
         // console.log(this.URL)
-        if (this.URL.includes("/shorts")) {
+
+        if (this.URL.includes("/shorts") && !this.URL.includes("@")) {
             this.init2()
         }
         if (this.URL.includes("/watch")) {
-            clearInterval(InitLoop)
-            setTimeout(() => {
-                this.init3()
-            }, 1000);
-
+            this.init3()
         }
-        this.SHORTS_B = document.querySelector('[title="Shorts"][id = "endpoint"]')
-        if (this.SHORTS_B) {
-            clearInterval(InitLoop)
+        FUN.WaitST('[title="Shorts"][id = "endpoint"]', (a) => {
+            this.SHORTS_B = a
             this.getAllSD()
-            FUN.HideSHORTS_B()
-        }
-    }
-    init2() {
-        let Mpage = document.getElementById("page-manager")
-        this.SHORTS_BD = Mpage.querySelector('[role="main"]')
-        this.SHORTS_BDt = this.SHORTS_BD.querySelector('[id="shorts-inner-container"]')
-        console.log(this.SHORTS_BD)
-        FUN.BlurSHORTS()
-
-    }
-    init3() {
-        this.SHORTS_D2 = document.querySelector('ytd-reel-shelf-renderer')
-        console.log(this.SHORTS_D2)
-        FUN.HideSHORTS_D2()
+            FUN.RemoveST(this.SHORTS_B)
+        })
     }
     getAllSD() {
         let allSD = document.querySelectorAll('span[id="title"]');
@@ -45,23 +28,42 @@ class html {
             }
         });
         this.SHORTS_Ds = targetSDs
-        // console.log(targetSDs)
+        console.log(targetSDs)
         FUN.HideSHORTS_D()
+    }
+    init2() {
+        let Mpage = document.getElementById("page-manager")
+        this.SHORTS_BD = Mpage.querySelector('[role="main"]')
+        this.SHORTS_BDt = this.SHORTS_BD.querySelector('[id="shorts-inner-container"]')
+        console.log(this.SHORTS_BD)
+        FUN.BlurSHORTS()
+
+    }
+    init3() {
+        FUN.WaitST('ytd-reel-shelf-renderer', (a) => {
+            this.SHORTS_D2 = a
+            FUN.RemoveST(this.SHORTS_D2)
+        })
     }
 }
 
 class fun {
     constructor() {
+        this.waits = {}
     }
-    HideSHORTS_B() {
-        HTML.SHORTS_B.remove()
-    }
-    HideSHORTS_D2() {
-        HTML.SHORTS_D2.remove()
+    RemoveST(e) {
+        e.remove()
     }
     HideSHORTS_D() {
         HTML.SHORTS_Ds.forEach((SD) => {
-            SD.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.remove()
+            // console.log(SD.closest('ytd-item-section-renderer'))
+            if (SD.closest('ytd-item-section-renderer')) {
+                SD.closest('ytd-item-section-renderer').remove()
+            }
+            if (SD.closest('ytd-rich-section-renderer')) {
+                SD.closest('ytd-rich-section-renderer').remove()
+            }
+            // SD.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.remove()
         })
     }
     BlurSHORTS() {
@@ -72,17 +74,39 @@ class fun {
                 clearInterval(t)
             }
             HTML.SHORTS_BDt.querySelectorAll("video").forEach((a) => {
-                console.log("!!")
                 a.muted = true
             });
         }, 1000)
+
+        document.addEventListener('keydown', (event) => {
+            if (event.keyCode === 38 || event.keyCode === 40) {
+                console.log('上下鍵被按下');
+                window.location.href = "https://www.youtube.com/";
+                // window.history.back()
+            }
+        });
+    }
+    WaitST(html, callback, time = 500) {
+        this.waits[html] = setInterval(() => {
+            let t = document.querySelector(html)
+            if (t) {
+                console.log(t)
+                callback(t)
+                clearInterval([this.waits[html]])
+            }
+        }, time);
     }
 }
+
+
 let HTML = new html()
 let FUN = new fun()
 
 window.addEventListener("load", () => {
-    let InitLoop = setInterval(() => {
-        HTML.init(InitLoop)
-    }, 1000);
+    HTML.init()
 })
+setInterval(() => {
+    if (window.location.href !== HTML.URL) {
+        HTML.init()
+    }
+}, 3000);
